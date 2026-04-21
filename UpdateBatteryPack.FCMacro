@@ -1,0 +1,56 @@
+import FreeCAD as App
+import math
+
+def calc_len(num_cells, bracket_side, offset):
+    extra_half_side = (bracket_side / 2.0) if (num_cells % 2 == 0) else 0.0
+    num_double_sides = math.ceil(num_cells / 2.0)
+    num_single_sides = num_cells = num_double_sides
+    return (num_single_sides * bracket_side) + (num_double_sides * 2 * bracket_side) + extra_half_side + offset
+
+# --- CONFIGURATION ---
+# Change this to match the exact name of your spreadsheet in the Tree View!
+SPREADSHEET_NAME = "Spreadsheet" 
+bracket_width = 22.0
+bracket_end_strip_excess_width = 3.0
+gap = 0.0 #This is to leave a small gap so that one can easily insert the pack into the box
+# ---------------------
+
+# 1. Grab the currently open document
+doc = App.ActiveDocument
+
+if not doc:
+    App.Console.PrintError("Error: No document is open!\n")
+else:
+    # 2. Find your existing spreadsheet
+    sheet = doc.getObject(SPREADSHEET_NAME)
+  
+    if not sheet:
+        App.Console.PrintError(f"Error: Could not find a spreadsheet named '{SPREADSHEET_NAME}'. Check the Tree View.\n")
+    else:
+        try:
+            # 3. Read inputs using the Aliases you set up
+            cells_in_length = int(getattr(sheet, "CellsInLength"))
+            cells_in_height = int(getattr(sheet, "CellsInHeight"))
+          
+            bracket_side = bracket_width / math.sqrt(3)
+          
+            # 4. Calculate the dimensions
+            length = calc_len(cells_in_length, bracket_side, 2 * bracket_end_strip_excess_width) + gap
+            height = calc_len(cells_in_height, bracket_side, 2 * bracket_end_strip_excess_width) + gap
+            
+            length = math.ceil(length)
+            height = math.ceil(height)
+          
+            # 5. Write outputs to specific cells (Change "B10" and "B11" to wherever you want the answers to appear)
+            sheet.set("C5", str(length))
+            sheet.setAlias("C5", "PackLength")
+          
+            sheet.set("C6", str(height))
+            sheet.setAlias("C6", "PackHeight")
+          
+            # 6. Recompute the document to update your Part Design 3D model!
+            doc.recompute()
+            App.Console.PrintMessage(f"Success! Pack dimensions updated to Length: {length:.2f}, Height: {height:.2f}\n")
+          
+        except AttributeError:
+            App.Console.PrintError("Error: Could not find the Aliases 'CellsInLength' or 'CellsInHeight' in your spreadsheet.\n")
