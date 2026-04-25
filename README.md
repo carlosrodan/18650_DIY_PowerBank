@@ -18,7 +18,7 @@ I'm aware the sketches is quite sensitive to parameter adjustments that's way I 
 
 * Ideally the number of middle holes for the side lid would adjust to the width of the pack (using a linear pattern for example with a varying number of instances). However FreeCAD doesn't support zero instances to my knowledge and it's a bit tricky to implement. 
 
-=================================
+===============================
 
 ## License
 
